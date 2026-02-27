@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>歯友会　動画ポータル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #13161d;
+      --surface2: #1c202b;
+      --border: #252a38;
+      --accent: #4f8ef7;
+      --accent2: #7c5ff5;
+      --text: #e2e6f0;
+      --text-muted: #6b7394;
+      --tag-bg: #1e2540;
+      --tag-text: #7c9ef5;
+      --card-hover: #181c27;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ─── LOGIN SCREEN ─── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #login-screen::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      pointer-events: none;
+    }
+    #login-screen::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(124,95,245,0.1) 0%, transparent 70%);
+      bottom: -50px; right: -50px;
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 52px 48px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+    .login-logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .login-logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .login-logo-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .login-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .login-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    .input-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 50px 14px 16px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.08em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-wrap input:focus { border-color: var(--accent); }
+    .input-wrap input::placeholder { color: var(--text-muted); letter-spacing: 0.02em; font-family: 'Noto Sans JP', sans-serif; }
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 18px;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Noto Sans JP', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
+
+    .login-error {
+      color: #f07070;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+      min-height: 20px;
+      transition: opacity 0.2s;
+    }
+
+    /* shake animation */
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-5px)}
+      80%{transform:translateX(5px)}
+    }
+    .shake { animation: shake 0.4s ease; }
+
+    /* ─── PORTAL ─── */
+    #portal { display: none; }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 700;
+    }
+    .header-logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .header-meta {
+      display: flex; align-items: center; gap: 20px;
+    }
+    #video-count {
+      font-size: 13px; color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+    }
+    #last-updated {
+      font-size: 12px; color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+    }
+    .logout-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 8px; padding: 7px 14px;
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    .logout-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .main-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 36px 32px 64px;
+    }
+
+    /* Search & Filter bar */
+    .toolbar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 220px;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px 11px 42px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 16px; pointer-events: none;
+    }
+    #tag-filter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      outline: none;
+      cursor: pointer;
+      min-width: 160px;
+    }
+    #sort-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Video Grid */
+    #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+      display: block;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      border-color: rgba(79,142,247,0.3);
+    }
+
+    .thumb-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+    .thumb-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .video-card:hover .thumb-wrap img { transform: scale(1.04); }
+
+    .play-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+      background: rgba(0,0,0,0.35);
+    }
+    .video-card:hover .play-overlay { opacity: 1; }
+    .play-btn {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .unlisted-badge {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(20,22,32,0.85);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      color: var(--text-muted);
+      backdrop-filter: blur(4px);
+    }
+
+    .card-body {
+      padding: 16px 18px 18px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 12px;
+    }
+    .tag-list {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .tag {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    /* Empty state */
+    #empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    #empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    #empty-state p { font-size: 15px; }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: var(--surface2);
+      border-radius: 8px;
+      animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer {
+      0%,100%{ opacity: 0.5; }
+      50%{ opacity: 1; }
+    }
+    .skel-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .skel-thumb { aspect-ratio: 16/9; }
+    .skel-body { padding: 16px 18px 18px; }
+    .skel-line { height: 14px; margin-bottom: 8px; }
+    .skel-line.short { width: 60%; }
+    .skel-line.shorter { width: 40%; }
+
+    @media (max-width: 640px) {
+      header { padding: 0 16px; }
+      .main-content { padding: 24px 16px 48px; }
+      .toolbar { gap: 8px; }
+      #video-grid { grid-template-columns: 1fr; }
+      .header-meta { gap: 10px; }
+      #last-updated { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">▶</div>
+      <div>
+        <div class="login-logo-text">歯友会　動画ポータル</div>
+        <div class="login-logo-sub">Shiyukai Video Portal</div>
+      </div>
+    </div>
+    <div class="login-title">ログイン</div>
+    <div class="login-desc">このポータルは社内限定公開です。<br>パスワードを入力してアクセスしてください。</div>
+    <div class="input-wrap">
+      <input type="password" id="pw-input" placeholder="パスワードを入力" autocomplete="current-password" />
+      <button class="toggle-pw" type="button" onclick="togglePw()" title="表示/非表示">👁</button>
+    </div>
+    <button class="login-btn" onclick="tryLogin()">アクセスする</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ─── PORTAL ─── -->
+<div id="portal">
+  <header>
+    <div class="header-logo">
+      <div class="header-logo-icon">▶</div>
+      歯友会　動画ポータル
+    </div>
+    <div class="header-meta">
+      <span id="video-count"></span>
+      <span id="last-updated"></span>
+      <button class="logout-btn" onclick="logout()">ログアウト</button>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="タイトル・タグで検索..." oninput="filterVideos()" />
+      </div>
+      <select id="tag-filter" onchange="filterVideos()">
+        <option value="">すべてのタグ</option>
+      </select>
+      <select id="sort-select" onchange="filterVideos()">
+        <option value="newest">新しい順</option>
+        <option value="oldest">古い順</option>
+        <option value="title">タイトル順</option>
+      </select>
+    </div>
+
+    <div id="video-grid">
+      <!-- skeleton -->
+      <div class="skel-card">
+        <div class="skel-thumb skeleton"></div>
+        <div class="skel-body">
+          <div class="skel-line skeleton"></div>
+          <div class="skel-line short skeleton"></div>
+          <div class="skel-line shorter skeleton"></div>
+        </div>
+      </div>
+      <div class="skel-card">
+        <div class="skel-thumb skeleton"></div>
+        <div class="skel-body">
+          <div class="skel-line skeleton"></div>
+          <div class="skel-line short skeleton"></div>
+          <div class="skel-line shorter skeleton"></div>
+        </div>
+      </div>
+      <div class="skel-card">
+        <div class="skel-thumb skeleton"></div>
+        <div class="skel-body">
+          <div class="skel-line skeleton"></div>
+          <div class="skel-line short skeleton"></div>
+          <div class="skel-line shorter skeleton"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Password (SHA-256 hash of "shiyuhkai8112") ───
+  // To update password: replace PASS_HASH with sha256 of new password
+  const PASS_HASH = "b1f4c6d0a7e2f3b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2";
+  // NOTE: For production, replace the above with the actual SHA-256 of your password.
+  // The login below compares plain-text for simplicity; swap to hash check if needed.
+  const CORRECT_PASSWORD = "shiyuhkai8112";
+
+  let allVideos = [];
+
+  function togglePw() {
+    const inp = document.getElementById('pw-input');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function tryLogin() {
+    const val = document.getElementById('pw-input').value;
+    if (val === CORRECT_PASSWORD) {
+      sessionStorage.setItem('portal_auth', '1');
+      showPortal();
+    } else {
+      const card = document.querySelector('.login-card');
+      const err = document.getElementById('login-error');
+      err.textContent = 'パスワードが正しくありません';
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+    }
+  }
+
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') tryLogin();
+  });
+
+  function logout() {
+    sessionStorage.removeItem('portal_auth');
+    document.getElementById('portal').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('login-error').textContent = '';
+  }
+
+  function showPortal() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('portal').style.display = 'block';
+    loadVideos();
+  }
+
+  // Auto-login if session exists
+  if (sessionStorage.getItem('portal_auth') === '1') {
+    showPortal();
+  }
+
+  async function loadVideos() {
+    try {
+      const res = await fetch('videos.json?t=' + Date.now());
+      const data = await res.json();
+      allVideos = data.videos || [];
+
+      // Update header meta
+      document.getElementById('video-count').textContent = `${allVideos.length} 本`;
+      if (data.updated_at) {
+        const d = new Date(data.updated_at);
+        document.getElementById('last-updated').textContent =
+          `更新: ${d.toLocaleDateString('ja-JP')} ${d.toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})}`;
+      }
+
+      // Build tag filter
+      const allTags = [...new Set(allVideos.flatMap(v => v.tags || []))].sort();
+      const sel = document.getElementById('tag-filter');
+      sel.innerHTML = '<option value="">すべてのタグ</option>';
+      allTags.forEach(tag => {
+        const o = document.createElement('option');
+        o.value = tag; o.textContent = tag;
+        sel.appendChild(o);
+      });
+
+      filterVideos();
+    } catch(e) {
+      document.getElementById('video-grid').innerHTML =
+        `<div id="empty-state"><div class="empty-icon">⚠️</div><p>videos.json の読み込みに失敗しました</p></div>`;
+    }
+  }
+
+  function filterVideos() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const tag = document.getElementById('tag-filter').value;
+    const sort = document.getElementById('sort-select').value;
+
+    let filtered = allVideos.filter(v => {
+      const matchQ = !q || v.title.toLowerCase().includes(q) ||
+                     (v.tags||[]).some(t => t.toLowerCase().includes(q));
+      const matchTag = !tag || (v.tags||[]).includes(tag);
+      return matchQ && matchTag;
+    });
+
+    if (sort === 'newest') filtered.sort((a,b) => new Date(b.published_at) - new Date(a.published_at));
+    else if (sort === 'oldest') filtered.sort((a,b) => new Date(a.published_at) - new Date(b.published_at));
+    else if (sort === 'title') filtered.sort((a,b) => a.title.localeCompare(b.title, 'ja'));
+
+    renderGrid(filtered);
+  }
+
+  function renderGrid(videos) {
+    const grid = document.getElementById('video-grid');
+    if (!videos.length) {
+      grid.innerHTML = `<div id="empty-state"><div class="empty-icon">🎬</div><p>該当する動画が見つかりませんでした</p></div>`;
+      return;
+    }
+    grid.innerHTML = videos.map(v => {
+      const date = new Date(v.published_at).toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
+      const tags = (v.tags||[]).slice(0,4).map(t => `<span class="tag">${t}</span>`).join('');
+      const thumb = v.thumbnail || `https://img.youtube.com/vi/${v.video_id}/mqdefault.jpg`;
+      return `
+        <a class="video-card" href="https://www.youtube.com/watch?v=${v.video_id}" target="_blank" rel="noopener">
+          <div class="thumb-wrap">
+            <img src="${thumb}" alt="${v.title}" loading="lazy" onerror="this.src='https://img.youtube.com/vi/${v.video_id}/mqdefault.jpg'">
+            <div class="play-overlay"><div class="play-btn">▶</div></div>
+            <span class="unlisted-badge">限定公開</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${v.title}</div>
+            <div class="card-date">${date}</div>
+            ${tags ? `<div class="tag-list">${tags}</div>` : ''}
+          </div>
+        </a>`;
+    }).join('');
+  }
+</script>
+</body>
+</html>

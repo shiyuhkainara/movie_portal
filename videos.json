@@ -1,0 +1,19 @@
+{
+  "updated_at": "2026-02-27T00:00:00Z",
+  "videos": [
+    {
+      "video_id": "SAMPLE_ID_1",
+      "title": "【サンプル】新入社員オリエンテーション 2026",
+      "published_at": "2026-02-20T10:00:00Z",
+      "thumbnail": "https://img.youtube.com/vi/SAMPLE_ID_1/mqdefault.jpg",
+      "tags": ["オリエンテーション", "新入社員", "2026"]
+    },
+    {
+      "video_id": "SAMPLE_ID_2",
+      "title": "【サンプル】製品トレーニング Vol.1",
+      "published_at": "2026-02-15T09:00:00Z",
+      "thumbnail": "https://img.youtube.com/vi/SAMPLE_ID_2/mqdefault.jpg",
+      "tags": ["トレーニング", "製品", "研修"]
+    }
+  ]
+}
