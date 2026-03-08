@@ -1,8 +1,8 @@
 name: 動画リスト自動更新
 
 on:
-  schedule:
-    - cron: '0 * * * *'
+schedule:
+  - cron: '0 0 * * 3'
   workflow_dispatch:
 
 jobs:
